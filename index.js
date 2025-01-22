@@ -6,10 +6,26 @@ const port = process.env.PORT || 3000
 const app = express()
 
 app.get("/", (req, res) => {
-    return res.send(`
-        <h1>Hello!</h1>
-        <a href="./auth">Logga in med GitHub</a>
-        `)
+    if (!req.query.token) {
+        return res.send(`
+            <h1>Hello!</h1>
+            <a href="./auth">Logga in med GitHub</a>
+            `)
+    } else {
+        try {
+            const user = jwt.verify(req.query.token, process.env.JWT_SECRET);
+
+            return res.send(`
+                <h1>Hello ${user.name}!</h1>
+                You are logged in!
+            `);
+
+        } catch (error) {
+            console.log(error);
+            res.status(401).send('Authorization failed!')
+        }
+    }
+
 });
 
 app.get("/auth", (req, res) => {
